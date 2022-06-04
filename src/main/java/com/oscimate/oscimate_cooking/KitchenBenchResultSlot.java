@@ -1,0 +1,89 @@
+package com.oscimate.oscimate_cooking;
+
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchSerializer;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.RecipeUnlocker;
+import net.minecraft.screen.slot.Slot;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.util.collection.DefaultedList;
+
+public class KitchenBenchResultSlot extends Slot {
+    private final KitchenBenchInventory input;
+    private final PlayerEntity player;
+    private int amount;
+
+    public KitchenBenchResultSlot(PlayerEntity player, KitchenBenchInventory input, Inventory inventory, int index, int x, int y) {
+        super(inventory, index, x, y);
+        this.player = player;
+        this.input = input;
+        this.amount = 0;
+    }
+
+    @Override
+    public boolean canInsert(ItemStack stack) { return false; }
+
+    @Override
+    public ItemStack takeStack(int amount) {
+        if (this.hasStack()) {
+            this.amount += Math.min(amount, this.getStack().getCount());
+        }
+
+        return super.takeStack(amount);
+    }
+
+    @Override
+    protected void onCrafted(ItemStack stack, int amount) {
+        this.amount += amount;
+        this.onCrafted(stack);
+    }
+
+    @Override
+    protected void onTake(int amount) {
+        this.amount += amount;
+    }
+
+    @Override
+    protected void onCrafted(ItemStack stack) {
+        if (amount > 0) {
+            stack.onCraft(player.world, player, amount);
+        }
+        if(inventory instanceof RecipeUnlocker) {
+            ((RecipeUnlocker) inventory).unlockLastRecipe(player);
+        }
+        amount = 0;
+    }
+
+    @Override
+    public void onTakeItem(PlayerEntity player, ItemStack stack) {
+        this.onCrafted(stack);
+        DefaultedList<ItemStack> defaultedList = player.world.getRecipeManager().getRemainingStacks(KitchenBenchRecipe.Type.INSTANCE, this.input, player.world);
+
+        for(int i = 0; i < defaultedList.size(); ++i) {
+            ItemStack itemStack = this.input.getStack(i);
+            ItemStack itemStack2 = defaultedList.get(i);
+            if (!itemStack.isEmpty()) {
+                this.input.removeStack(i, 1);
+                itemStack = this.input.getStack(i);
+            }
+
+            if (!itemStack2.isEmpty()) {
+                if (itemStack.isEmpty()) {
+                    this.input.setStack(i, itemStack2);
+                } else if (ItemStack.areItemsEqualIgnoreDamage(itemStack, itemStack2) && ItemStack.areNbtEqual(itemStack, itemStack2)) {
+                    itemStack2.increment(itemStack.getCount());
+                    this.input.setStack(i, itemStack2);
+                } else if (!this.player.getInventory().insertStack(itemStack2)) {
+                    this.player.dropItem(itemStack2, false);
+                }
+            }
+        }
+
+        if(!player.world.isClient()) {
+            player.world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_POINTED_DRIPSTONE_DRIP_WATER, SoundCategory.BLOCKS, 1.0F, 1.0F);
+        }
+    }
+}

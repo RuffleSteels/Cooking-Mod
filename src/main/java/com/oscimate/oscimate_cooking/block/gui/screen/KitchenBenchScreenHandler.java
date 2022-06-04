@@ -1,7 +1,12 @@
 package com.oscimate.oscimate_cooking.block.gui.screen;
 
+import com.oscimate.oscimate_cooking.KitchenBenchInventory;
+import com.oscimate.oscimate_cooking.KitchenBenchResultSlot;
 import com.oscimate.oscimate_cooking.Main;
+import com.oscimate.oscimate_cooking.block.BlockRegistry;
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
 import net.minecraft.block.FurnaceBlock;
+import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
@@ -9,22 +14,38 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.recipe.Recipe;
+import net.minecraft.recipe.RecipeMatcher;
+import net.minecraft.recipe.book.RecipeBookCategory;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.world.World;
 
-public class KitchenBenchScreenHandler extends ScreenHandler {
-    private final Inventory inventory;
+import java.util.Optional;
+
+public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<KitchenBenchInventory> {
+    public final KitchenBenchInventory input;
+    private final CraftingResultInventory result;
+    private final ScreenHandlerContext context;
+    public final PlayerInventory playerInventory;
 
     public KitchenBenchScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(10));
+        this(syncId, playerInventory, ScreenHandlerContext.EMPTY);
     }
 
 
-    public KitchenBenchScreenHandler(int syncId, PlayerInventory playerInventory, Inventory inventory) {
+    public KitchenBenchScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(Main.SCREEN_REGISTRY.KITCHEN_BENCH_SCREEN_HANDLER, syncId);
-        checkSize(inventory, 9);
-        this.inventory = inventory;
+        this.input = new KitchenBenchInventory(this, 9);
+        this.playerInventory = playerInventory;
+        this.result = new CraftingResultInventory();
+        this.context = context;
+
+        checkSize(this.input, 9);
+        this.input.onOpen(playerInventory.player);
+
         int m;
         int l;
 
@@ -42,64 +63,120 @@ public class KitchenBenchScreenHandler extends ScreenHandler {
         //My Inventory
         for (m = 0; m < 3; ++m) {
             for (l = 0; l < 3; ++l) {
-                this.addSlot(new Slot(inventory, l + m * 3, 30 + l * 18, 17 + m * 18));
+                this.addSlot(new Slot(this.input, l + m * 3, 30 + l * 18, 17 + m * 18));
             }
         }
 
 
-        this.addSlot(new Slot(this.inventory, 9, 124, 35) {
+        this.addSlot(new KitchenBenchResultSlot(playerInventory.player, this.input, this.result, 10, 124, 35));
+    }
 
-            @Override
-            public boolean canInsert(ItemStack stack) {
-                return false;
-            }
-
-            @Override
-            public void onTakeItem(PlayerEntity player, ItemStack stack) {
-                for(int m = 0; m < 9; m++) {
-                    KitchenBenchScreenHandler.this.inventory.removeStack(m, 1);
+    protected static void updateResult(ScreenHandler handler, World world, PlayerEntity playerEntity, KitchenBenchInventory craftingInventory, CraftingResultInventory resultInventory) {
+        if (!world.isClient) {
+            ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
+            ItemStack itemStack = ItemStack.EMPTY;
+            Optional<KitchenBenchRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(KitchenBenchRecipe.Type.INSTANCE, craftingInventory, world);
+            if (optional.isPresent()) {
+                KitchenBenchRecipe spellRecipe = optional.get();
+                if (resultInventory.shouldCraftRecipe(world, serverPlayerEntity, spellRecipe)) {
+                    itemStack = spellRecipe.craft(craftingInventory);
                 }
             }
-        });
 
+            resultInventory.setStack(9, itemStack);
+            handler.setPreviousTrackedSlot(9, itemStack);
+            serverPlayerEntity.networkHandler.sendPacket(new ScreenHandlerSlotUpdateS2CPacket(handler.syncId, handler.nextRevision(), 8, itemStack));
+        }
     }
 
-
-
-    @Override
-    public boolean canUse(PlayerEntity player) {
-        return this.inventory.canPlayerUse(player);
+    public void onContentChanged(Inventory inventory) {
+        this.context.run((world, pos) -> updateResult(this, world, this.playerInventory.player, this.input, this.result));
     }
 
-    @Override
+    @Override // Shift-Click interactions
     public ItemStack transferSlot(PlayerEntity player, int index) {
         ItemStack itemStack = ItemStack.EMPTY;
-        Slot slot = (Slot)this.slots.get(index);
+        Slot slot = this.slots.get(index);
         if (slot != null && slot.hasStack()) {
             ItemStack itemStack2 = slot.getStack();
             itemStack = itemStack2.copy();
-            if (index == 0) {
-                if (!this.insertItem(itemStack2, 10, 46, true)) {
+            if (index == 8) {
+                this.context.run((world, pos) -> itemStack2.getItem().onCraft(itemStack2, world, player));
+                if (!this.insertItem(itemStack2, 9, 45, true)) {
                     return ItemStack.EMPTY;
                 }
+
                 slot.onQuickTransfer(itemStack2, itemStack);
-            } else if (index >= 10 && index < 46 ? !this.insertItem(itemStack2, 1, 10, false) && (index < 37 ? !this.insertItem(itemStack2, 37, 46, false) : !this.insertItem(itemStack2, 10, 37, false)) : !this.insertItem(itemStack2, 10, 46, false)) {
+            } else if (index >= 9 && index < 46) {
+                if (!this.insertItem(itemStack2, 0, 9, false)) {
+                    if (index < 37) {
+                        if (!this.insertItem(itemStack2, 37, 45, false)) {
+                            return ItemStack.EMPTY;
+                        }
+                    } else if (!this.insertItem(itemStack2, 9, 37, false)) {
+                        return ItemStack.EMPTY;
+                    }
+                }
+            } else if (!this.insertItem(itemStack2, 9, 45, false)) {
                 return ItemStack.EMPTY;
             }
+
             if (itemStack2.isEmpty()) {
                 slot.setStack(ItemStack.EMPTY);
             } else {
                 slot.markDirty();
             }
+
             if (itemStack2.getCount() == itemStack.getCount()) {
                 return ItemStack.EMPTY;
             }
+
             slot.onTakeItem(player, itemStack2);
-            if (index == 0) {
+            if (index == 8) {
                 player.dropItem(itemStack2, false);
             }
         }
+
         return itemStack;
     }
+
+    @Override
+    public boolean canUse(PlayerEntity player) { return canUse(this.context, player, BlockRegistry.KITCHEN_BENCH); }
+
+    @Override
+    public void populateRecipeFinder(RecipeMatcher finder) { this.input.provideRecipeInputs(finder); }
+
+    @Override
+    public void clearCraftingSlots() {
+        this.input.clear();
+        this.result.clear();
+    }
+
+    @Override
+    public boolean matches(Recipe<? super KitchenBenchInventory> recipe) { return recipe.matches(this.input, this.playerInventory.player.world); }
+
+    @Override
+    public int getCraftingResultSlotIndex() { return 9; }
+
+    @Override
+    public int getCraftingWidth() { return Integer.MAX_VALUE; }
+
+    @Override
+    public int getCraftingHeight() { return Integer.MAX_VALUE; }
+
+    @Override
+    public int getCraftingSlotCount() { return 9; }
+
+    @Override
+    public RecipeBookCategory getCategory() {
+        return null;
+    }
+
+    @Override
+    public boolean canInsertIntoSlot(int index) { return index != this.getCraftingResultSlotIndex(); }
+
+    @Override
+    public boolean canInsertIntoSlot(ItemStack stack, Slot slot) { return slot.inventory != this.result && super.canInsertIntoSlot(stack, slot); }
+
 
 }
