@@ -1,8 +1,11 @@
 package com.oscimate.oscimate_cooking;
 
 import com.oscimate.oscimate_cooking.block.BlockRegistry;
+import com.oscimate.oscimate_cooking.block.entity.KitchenBenchEntity;
+import com.oscimate.oscimate_cooking.block.gui.screen.KitchenBenchScreenHandler;
 import com.oscimate.oscimate_cooking.block.gui.screen.ScreenRegistry;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.screen.CraftingScreenHandler;
 
 public class Main implements ModInitializer {
     public static final String MODID = "oscimate_cooking";

@@ -11,14 +11,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.*;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.World;
 
 public class KitchenBenchScreenHandler extends ScreenHandler {
     private final Inventory inventory;
-    public static final Inventory result = new CraftingResultInventory();
-
 
     public KitchenBenchScreenHandler(int syncId, PlayerInventory playerInventory) {
-        this(syncId, playerInventory, new SimpleInventory(9));
+        this(syncId, playerInventory, new SimpleInventory(10));
     }
 
 
@@ -48,7 +47,7 @@ public class KitchenBenchScreenHandler extends ScreenHandler {
         }
 
 
-        this.addSlot(new Slot(this.result, 0, 124, 35) {
+        this.addSlot(new Slot(this.inventory, 9, 124, 35) {
 
             @Override
             public boolean canInsert(ItemStack stack) {
@@ -58,12 +57,13 @@ public class KitchenBenchScreenHandler extends ScreenHandler {
             @Override
             public void onTakeItem(PlayerEntity player, ItemStack stack) {
                 for(int m = 0; m < 9; m++) {
-                    KitchenBenchScreenHandler.this.inventory.setStack(m, ItemStack.EMPTY);
+                    KitchenBenchScreenHandler.this.inventory.removeStack(m, 1);
                 }
             }
         });
 
     }
+
 
 
     @Override
@@ -72,28 +72,34 @@ public class KitchenBenchScreenHandler extends ScreenHandler {
     }
 
     @Override
-    public ItemStack transferSlot(PlayerEntity player, int invSlot) {
-        ItemStack newStack = ItemStack.EMPTY;
-        Slot slot = this.slots.get(invSlot);
+    public ItemStack transferSlot(PlayerEntity player, int index) {
+        ItemStack itemStack = ItemStack.EMPTY;
+        Slot slot = (Slot)this.slots.get(index);
         if (slot != null && slot.hasStack()) {
-            ItemStack originalStack = slot.getStack();
-            newStack = originalStack.copy();
-            if (invSlot < this.inventory.size()) {
-                if (!this.insertItem(originalStack, this.inventory.size(), this.slots.size(), true)) {
+            ItemStack itemStack2 = slot.getStack();
+            itemStack = itemStack2.copy();
+            if (index == 0) {
+                if (!this.insertItem(itemStack2, 10, 46, true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.insertItem(originalStack, 0, this.inventory.size(), false)) {
+                slot.onQuickTransfer(itemStack2, itemStack);
+            } else if (index >= 10 && index < 46 ? !this.insertItem(itemStack2, 1, 10, false) && (index < 37 ? !this.insertItem(itemStack2, 37, 46, false) : !this.insertItem(itemStack2, 10, 37, false)) : !this.insertItem(itemStack2, 10, 46, false)) {
                 return ItemStack.EMPTY;
             }
-
-            if (originalStack.isEmpty()) {
+            if (itemStack2.isEmpty()) {
                 slot.setStack(ItemStack.EMPTY);
             } else {
                 slot.markDirty();
             }
+            if (itemStack2.getCount() == itemStack.getCount()) {
+                return ItemStack.EMPTY;
+            }
+            slot.onTakeItem(player, itemStack2);
+            if (index == 0) {
+                player.dropItem(itemStack2, false);
+            }
         }
-
-        return newStack;
+        return itemStack;
     }
 
 }
