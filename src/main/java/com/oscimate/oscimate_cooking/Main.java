@@ -3,7 +3,6 @@ package com.oscimate.oscimate_cooking;
 import com.oscimate.oscimate_cooking.block.BlockRegistry;
 import com.oscimate.oscimate_cooking.block.gui.screen.ScreenRegistry;
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
-import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchSerializer;
 import net.fabricmc.api.ModInitializer;
 
 public class Main implements ModInitializer {
