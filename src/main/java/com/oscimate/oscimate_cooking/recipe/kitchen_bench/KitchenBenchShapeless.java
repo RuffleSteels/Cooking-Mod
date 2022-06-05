@@ -60,16 +60,6 @@ public class KitchenBenchShapeless implements CraftingRecipe {
 
     public static class Serializer implements RecipeSerializer<KitchenBenchShapeless> {
 
-        private static DefaultedList<Ingredient> getIngredients(JsonArray json) {
-            DefaultedList<Ingredient> defaultedList = DefaultedList.of();
-            for (int i = 0; i < json.size(); ++i) {
-                Ingredient ingredient = Ingredient.fromJson(json.get(i));
-                if (ingredient.isEmpty()) continue;
-                defaultedList.add(ingredient);
-            }
-            return defaultedList;
-        }
-
         @Override
         public KitchenBenchShapeless read(Identifier id, JsonObject json) {
             return new KitchenBenchShapeless(RecipeSerializer.SHAPELESS.read(id, json));
