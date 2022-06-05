@@ -12,42 +12,26 @@ import net.minecraft.util.JsonHelper;
 import net.minecraft.util.collection.DefaultedList;
 import net.minecraft.world.World;
 
-public class KitchenBenchShapeless implements CraftingRecipe {
-    private final Identifier id;
-    final String group;
-    final ItemStack output;
-    final DefaultedList<Ingredient> input;
+import java.util.Objects;
 
-    public KitchenBenchShapeless(Identifier id, String group, ItemStack output, DefaultedList<Ingredient> input) {
-        this.id = id;
-        this.group = group;
-        this.output = output;
-        this.input = input;
+public class KitchenBenchShapeless implements CraftingRecipe {
+    private final ShapelessRecipe _recipe;
+
+    public KitchenBenchShapeless(ShapelessRecipe recipe) {
+        this._recipe = Objects.requireNonNull(recipe);
+    }
+
+    public RecipeType<?> getType() {
+        return KitchenBenchRecipeType.KITCHEN_BENCH_CRAFTING;
     }
 
     @Override
     public Identifier getId() {
-        return this.id;
+        return this._recipe.getId();
     }
-
     @Override
     public RecipeSerializer<?> getSerializer() {
-        return RecipeSerializer.SHAPELESS;
-    }
-
-    @Override
-    public String getGroup() {
-        return this.group;
-    }
-
-    @Override
-    public ItemStack getOutput() {
-        return this.output;
-    }
-
-    @Override
-    public DefaultedList<Ingredient> getIngredients() {
-        return this.input;
+        return KitchenBenchRecipeSerializer.SHAPELESS;
     }
 
     @Override
@@ -60,33 +44,29 @@ public class KitchenBenchShapeless implements CraftingRecipe {
             ++i;
             recipeMatcher.addInput(itemStack, 1);
         }
-        return i == this.input.size() && recipeMatcher.match(this, null);
+        return i == this._recipe.getIngredients().size() && recipeMatcher.match(this, null);
     }
 
     @Override
     public ItemStack craft(CraftingInventory craftingInventory) {
-        return this.output.copy();
+        return this._recipe.getOutput().copy();
     }
 
     @Override
     public boolean fits(int width, int height) {
-        return width * height >= this.input.size();
+        return width * height >= this._recipe.getIngredients().size();
+    }
+    @Override
+    public ItemStack getOutput() {
+        return this._recipe.getOutput();
+    }
+
+    @Override
+    public String getGroup() {
+        return this._recipe.getGroup();
     }
 
     public static class Serializer implements RecipeSerializer<KitchenBenchShapeless> {
-        @Override
-        public KitchenBenchShapeless read(Identifier identifier, JsonObject jsonObject) {
-            String string = JsonHelper.getString(jsonObject, "group", "");
-            DefaultedList<Ingredient> defaultedList = KitchenBenchShapeless.Serializer.getIngredients(JsonHelper.getArray(jsonObject, "ingredients"));
-            if (defaultedList.isEmpty()) {
-                throw new JsonParseException("No ingredients for shapeless recipe");
-            }
-            if (defaultedList.size() > 9) {
-                throw new JsonParseException("Too many ingredients for shapeless recipe");
-            }
-            ItemStack itemStack = ShapedRecipe.outputFromJson(JsonHelper.getObject(jsonObject, "result"));
-            return new KitchenBenchShapeless(identifier, string, itemStack, defaultedList);
-        }
 
         private static DefaultedList<Ingredient> getIngredients(JsonArray json) {
             DefaultedList<Ingredient> defaultedList = DefaultedList.of();
@@ -99,35 +79,18 @@ public class KitchenBenchShapeless implements CraftingRecipe {
         }
 
         @Override
-        public KitchenBenchShapeless read(Identifier identifier, PacketByteBuf packetByteBuf) {
-            String string = packetByteBuf.readString();
-            int i = packetByteBuf.readVarInt();
-            DefaultedList<Ingredient> defaultedList = DefaultedList.ofSize(i, Ingredient.EMPTY);
-            for (int j = 0; j < defaultedList.size(); ++j) {
-                defaultedList.set(j, Ingredient.fromPacket(packetByteBuf));
-            }
-            ItemStack itemStack = packetByteBuf.readItemStack();
-            return new KitchenBenchShapeless(identifier, string, itemStack, defaultedList);
+        public KitchenBenchShapeless read(Identifier id, JsonObject json) {
+            return new KitchenBenchShapeless(RecipeSerializer.SHAPELESS.read(id, json));
         }
 
         @Override
-        public void write(PacketByteBuf packetByteBuf, KitchenBenchShapeless shapelessRecipe) {
-            packetByteBuf.writeString(shapelessRecipe.group);
-            packetByteBuf.writeVarInt(shapelessRecipe.input.size());
-            for (Ingredient ingredient : shapelessRecipe.input) {
-                ingredient.write(packetByteBuf);
-            }
-            packetByteBuf.writeItemStack(shapelessRecipe.output);
+        public KitchenBenchShapeless read(Identifier id, PacketByteBuf buf) {
+            return new KitchenBenchShapeless(RecipeSerializer.SHAPELESS.read(id, buf));
         }
 
         @Override
-        public /* synthetic */ Recipe read(Identifier id, PacketByteBuf buf) {
-            return this.read(id, buf);
-        }
-
-        @Override
-        public /* synthetic */ Recipe read(Identifier id, JsonObject json) {
-            return this.read(id, json);
+        public void write(PacketByteBuf buf, KitchenBenchShapeless recipe) {
+            RecipeSerializer.SHAPELESS.write(buf, recipe._recipe);
         }
     }
 }

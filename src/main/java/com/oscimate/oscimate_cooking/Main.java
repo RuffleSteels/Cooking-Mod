@@ -2,6 +2,7 @@ package com.oscimate.oscimate_cooking;
 
 import com.oscimate.oscimate_cooking.block.BlockRegistry;
 import com.oscimate.oscimate_cooking.block.gui.screen.ScreenRegistry;
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeSerializer;
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
 import net.fabricmc.api.ModInitializer;
 
@@ -10,7 +11,7 @@ public class Main implements ModInitializer {
     public static final BlockRegistry BLOCK_REGISTRY = new BlockRegistry();
     public static final ScreenRegistry SCREEN_REGISTRY = new ScreenRegistry();
     public static final KitchenBenchRecipeType KITCHEN_BENCH_RECIPE_TYPE = new KitchenBenchRecipeType();
-    public static final KitchenBenchSerializer KITCHEN_BENCH_SERIALIZER = new KitchenBenchSerializer();
+    public static final KitchenBenchRecipeSerializer KITCHEN_BENCH_SERIALIZER = new KitchenBenchRecipeSerializer();
 
 
     @Override
