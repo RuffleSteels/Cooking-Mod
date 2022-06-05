@@ -1,7 +1,6 @@
 package com.oscimate.oscimate_cooking;
 
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
-import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchSerializer;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;

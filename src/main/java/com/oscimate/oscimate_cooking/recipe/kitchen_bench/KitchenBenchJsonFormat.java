@@ -1,6 +1,8 @@
 package com.oscimate.oscimate_cooking.recipe.kitchen_bench;
 
 import com.google.gson.JsonObject;
+import net.minecraft.data.server.recipe.ShapedRecipeJsonBuilder;
+import net.minecraft.data.server.recipe.ShapelessRecipeJsonBuilder;
 
 public class KitchenBenchJsonFormat {
 

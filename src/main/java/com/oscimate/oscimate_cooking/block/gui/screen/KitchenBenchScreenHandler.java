@@ -5,15 +5,11 @@ import com.oscimate.oscimate_cooking.KitchenBenchResultSlot;
 import com.oscimate.oscimate_cooking.Main;
 import com.oscimate.oscimate_cooking.block.BlockRegistry;
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
-import net.minecraft.block.FurnaceBlock;
-import net.minecraft.block.entity.ChestBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeMatcher;
@@ -77,9 +73,9 @@ public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<Kitch
             ItemStack itemStack = ItemStack.EMPTY;
             Optional<KitchenBenchRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(KitchenBenchRecipe.Type.INSTANCE, craftingInventory, world);
             if (optional.isPresent()) {
-                KitchenBenchRecipe spellRecipe = optional.get();
-                if (resultInventory.shouldCraftRecipe(world, serverPlayerEntity, spellRecipe)) {
-                    itemStack = spellRecipe.craft(craftingInventory);
+                KitchenBenchRecipe kitchenBenchRecipe = optional.get();
+                if (resultInventory.shouldCraftRecipe(world, serverPlayerEntity, kitchenBenchRecipe)) {
+                    itemStack = kitchenBenchRecipe.craft(craftingInventory);
                 }
             }
 
