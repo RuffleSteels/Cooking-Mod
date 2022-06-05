@@ -9,6 +9,7 @@ import net.minecraft.block.CraftingTableBlock;
 import net.minecraft.block.InventoryProvider;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.ChestBlockEntity;
+import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.command.argument.ItemStringReader;
 import net.minecraft.data.server.recipe.CraftingRecipeJsonBuilder;
 import net.minecraft.data.server.recipe.RecipeJsonProvider;
@@ -43,8 +44,7 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-public class KitchenBenchEntity extends BlockEntity implements NamedScreenHandlerFactory, KitchenBenchInventory {
-    private DefaultedList<ItemStack> inventory = DefaultedList.ofSize(9, ItemStack.EMPTY);
+public class KitchenBenchEntity extends LockableContainerBlockEntity implements NamedScreenHandlerFactory {
 
     public KitchenBenchEntity(BlockPos pos, BlockState state) {
         super(BlockRegistry.KITCHEN_BENCH_ENTITY, pos, state);
@@ -62,7 +62,7 @@ public class KitchenBenchEntity extends BlockEntity implements NamedScreenHandle
     }
 
     public static void tick(World world, BlockPos pos, BlockState state, KitchenBenchEntity blockEntity) {
-        System.out.println(blockEntity.getStack(0));
+
     }
 
     @Nullable
@@ -72,29 +72,57 @@ public class KitchenBenchEntity extends BlockEntity implements NamedScreenHandle
     }
 
     @Override
+    protected ScreenHandler createScreenHandler(int syncId, PlayerInventory playerInventory) {
+        return null;
+    }
+
+    @Override
     public Text getDisplayName() {
         return new LiteralText("Kitchen Bench");
     }
 
-
     @Override
-    public void readNbt(NbtCompound nbt) {
-        super.readNbt(nbt);
-        this.inventory = DefaultedList.ofSize(9, ItemStack.EMPTY);
-        Inventories.readNbt(nbt, this.inventory);
-
-    }
-
-
-    @Override
-    protected void writeNbt(NbtCompound nbt) {
-        super.writeNbt(nbt);
-        System.out.println("Written: " + this.inventory);
-        Inventories.writeNbt(nbt, this.inventory);
+    protected Text getContainerName() {
+        return null;
     }
 
     @Override
-    public DefaultedList<ItemStack> getItems() {
-        return inventory;
+    public int size() {
+        return 0;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public ItemStack getStack(int slot) {
+        return null;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int amount) {
+        return null;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        return null;
+    }
+
+    @Override
+    public void setStack(int slot, ItemStack stack) {
+
+    }
+
+    @Override
+    public boolean canPlayerUse(PlayerEntity player) {
+        return false;
+    }
+
+    @Override
+    public void clear() {
+
     }
 }

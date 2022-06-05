@@ -1,16 +1,17 @@
 package com.oscimate.oscimate_cooking.block.gui.screen;
 
-import com.oscimate.oscimate_cooking.KitchenBenchInventory;
 import com.oscimate.oscimate_cooking.KitchenBenchResultSlot;
 import com.oscimate.oscimate_cooking.Main;
 import com.oscimate.oscimate_cooking.block.BlockRegistry;
-import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.CraftingResultInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket;
+import net.minecraft.recipe.CraftingRecipe;
 import net.minecraft.recipe.Recipe;
 import net.minecraft.recipe.RecipeMatcher;
 import net.minecraft.recipe.book.RecipeBookCategory;
@@ -21,8 +22,8 @@ import net.minecraft.world.World;
 
 import java.util.Optional;
 
-public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<KitchenBenchInventory> {
-    public final KitchenBenchInventory input;
+public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<CraftingInventory> {
+    public final CraftingInventory input;
     private final CraftingResultInventory result;
     private final ScreenHandlerContext context;
     public final PlayerInventory playerInventory;
@@ -34,7 +35,7 @@ public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<Kitch
 
     public KitchenBenchScreenHandler(int syncId, PlayerInventory playerInventory, ScreenHandlerContext context) {
         super(Main.SCREEN_REGISTRY.KITCHEN_BENCH_SCREEN_HANDLER, syncId);
-        this.input = new KitchenBenchInventory(this, 9);
+        this.input = new CraftingInventory(this, 3, 3);
         this.playerInventory = playerInventory;
         this.result = new CraftingResultInventory();
         this.context = context;
@@ -67,13 +68,13 @@ public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<Kitch
         this.addSlot(new KitchenBenchResultSlot(playerInventory.player, this.input, this.result, 10, 124, 35));
     }
 
-    protected static void updateResult(ScreenHandler handler, World world, PlayerEntity playerEntity, KitchenBenchInventory craftingInventory, CraftingResultInventory resultInventory) {
+    protected static void updateResult(ScreenHandler handler, World world, PlayerEntity playerEntity, CraftingInventory craftingInventory, CraftingResultInventory resultInventory) {
         if (!world.isClient) {
             ServerPlayerEntity serverPlayerEntity = (ServerPlayerEntity) playerEntity;
             ItemStack itemStack = ItemStack.EMPTY;
-            Optional<KitchenBenchRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(KitchenBenchRecipe.Type.INSTANCE, craftingInventory, world);
+            Optional<CraftingRecipe> optional = world.getServer().getRecipeManager().getFirstMatch(KitchenBenchRecipeType.KITCHEN_BENCH_CRAFTING, craftingInventory, world);
             if (optional.isPresent()) {
-                KitchenBenchRecipe kitchenBenchRecipe = optional.get();
+                CraftingRecipe kitchenBenchRecipe = optional.get();
                 if (resultInventory.shouldCraftRecipe(world, serverPlayerEntity, kitchenBenchRecipe)) {
                     itemStack = kitchenBenchRecipe.craft(craftingInventory);
                 }
@@ -149,7 +150,7 @@ public class KitchenBenchScreenHandler extends AbstractRecipeScreenHandler<Kitch
     }
 
     @Override
-    public boolean matches(Recipe<? super KitchenBenchInventory> recipe) { return recipe.matches(this.input, this.playerInventory.player.world); }
+    public boolean matches(Recipe<? super CraftingInventory> recipe) { return recipe.matches(this.input, this.playerInventory.player.world); }
 
     @Override
     public int getCraftingResultSlotIndex() { return 9; }

@@ -1,7 +1,8 @@
 package com.oscimate.oscimate_cooking;
 
-import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipe;
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.RecipeUnlocker;
@@ -11,11 +12,11 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.collection.DefaultedList;
 
 public class KitchenBenchResultSlot extends Slot {
-    private final KitchenBenchInventory input;
+    private final CraftingInventory input;
     private final PlayerEntity player;
     private int amount;
 
-    public KitchenBenchResultSlot(PlayerEntity player, KitchenBenchInventory input, Inventory inventory, int index, int x, int y) {
+    public KitchenBenchResultSlot(PlayerEntity player, CraftingInventory input, Inventory inventory, int index, int x, int y) {
         super(inventory, index, x, y);
         this.player = player;
         this.input = input;
@@ -59,7 +60,7 @@ public class KitchenBenchResultSlot extends Slot {
     @Override
     public void onTakeItem(PlayerEntity player, ItemStack stack) {
         this.onCrafted(stack);
-        DefaultedList<ItemStack> defaultedList = player.world.getRecipeManager().getRemainingStacks(KitchenBenchRecipe.Type.INSTANCE, this.input, player.world);
+        DefaultedList<ItemStack> defaultedList = player.world.getRecipeManager().getRemainingStacks(KitchenBenchRecipeType.KITCHEN_BENCH_CRAFTING, this.input, player.world);
 
         for(int i = 0; i < defaultedList.size(); ++i) {
             ItemStack itemStack = this.input.getStack(i);
