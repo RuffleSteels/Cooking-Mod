@@ -8,4 +8,8 @@ public class KitchenBenchRecipeType<T extends Recipe<?>> {
     public static final KitchenBenchRecipeType INSTANCE = new KitchenBenchRecipeType();
 
     public static final RecipeType<CraftingRecipe> KITCHEN_BENCH_CRAFTING = RecipeType.register("kitchen_bench_crafting");
+
+    public static void init() {
+
+    }
 }
