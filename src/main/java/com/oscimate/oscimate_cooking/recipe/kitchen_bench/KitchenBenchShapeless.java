@@ -36,25 +36,17 @@ public class KitchenBenchShapeless implements CraftingRecipe {
 
     @Override
     public boolean matches(CraftingInventory craftingInventory, World world) {
-        RecipeMatcher recipeMatcher = new RecipeMatcher();
-        int i = 0;
-        for (int j = 0; j < craftingInventory.size(); ++j) {
-            ItemStack itemStack = craftingInventory.getStack(j);
-            if (itemStack.isEmpty()) continue;
-            ++i;
-            recipeMatcher.addInput(itemStack, 1);
-        }
-        return i == this._recipe.getIngredients().size() && recipeMatcher.match(this, null);
+        return this._recipe.matches(craftingInventory, world);
     }
 
     @Override
     public ItemStack craft(CraftingInventory craftingInventory) {
-        return this._recipe.getOutput().copy();
+        return this._recipe.craft(craftingInventory);
     }
 
     @Override
     public boolean fits(int width, int height) {
-        return width * height >= this._recipe.getIngredients().size();
+        return this._recipe.fits(width, height);
     }
     @Override
     public ItemStack getOutput() {
