@@ -1,27 +1,18 @@
 package com.oscimate.oscimate_cooking.block;
 
-import com.oscimate.oscimate_cooking.block.entity.KitchenBenchEntity;
-import com.oscimate.oscimate_cooking.block.gui.screen.KitchenBenchScreenHandler;
+import com.oscimate.oscimate_cooking.block.entity.kitchen_bench.KitchenBenchEntity;
 import net.minecraft.block.*;
-import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.block.entity.BlockEntityTicker;
-import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.ItemPlacementContext;
-import net.minecraft.screen.GrindstoneScreenHandler;
 import net.minecraft.screen.NamedScreenHandlerFactory;
-import net.minecraft.screen.ScreenHandlerContext;
-import net.minecraft.screen.SimpleNamedScreenHandlerFactory;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.Properties;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.BlockMirror;
 import net.minecraft.util.BlockRotation;
@@ -31,7 +22,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.BlockRenderView;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
@@ -136,14 +126,6 @@ public class KitchenBench extends BlockWithEntity implements Waterloggable {
         return new KitchenBenchEntity(pos, state);
     }
 
-    @Nullable
-    public static <T extends BlockEntity> BlockEntityTicker<T> checkType(World world, BlockEntityType<T> givenType, BlockEntityType<? extends KitchenBenchEntity> expectedType) {
-        return world.isClient ? null : KitchenBench.checkType(givenType, expectedType, KitchenBenchEntity::tick);
-    }
 
-    @Nullable
-    @Override
-    public <T extends BlockEntity> BlockEntityTicker<T> getTicker(World world, BlockState state, BlockEntityType<T> type) {
-        return KitchenBench.checkType(world, type, BlockRegistry.KITCHEN_BENCH_ENTITY);
-    }
+
 }

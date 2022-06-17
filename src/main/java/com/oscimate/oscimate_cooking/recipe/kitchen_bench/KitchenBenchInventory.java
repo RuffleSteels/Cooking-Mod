@@ -1,4 +1,4 @@
-package com.oscimate.oscimate_cooking.block.entity;
+package com.oscimate.oscimate_cooking.recipe.kitchen_bench;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.Inventories;
@@ -7,26 +7,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.collection.DefaultedList;
 
 public interface KitchenBenchInventory extends Inventory {
-    /**
-     * Retrieves the item list of this inventory.
-     * Must return the same instance every time it's called.
-     */
+
     DefaultedList<ItemStack> getItems();
 
-
-    /**
-     * Creates an inventory from the item list.
-     */
     static KitchenBenchInventory of(DefaultedList<ItemStack> items) {
         return () -> items;
-    }
-
-
-    /**
-     * Creates a new inventory with the specified size.
-     */
-    static KitchenBenchInventory ofSize(int size) {
-        return of(DefaultedList.ofSize(size, ItemStack.EMPTY));
     }
 
     /**
@@ -124,6 +109,4 @@ public interface KitchenBenchInventory extends Inventory {
     default boolean canPlayerUse(PlayerEntity player) {
         return true;
     }
-
-
 }

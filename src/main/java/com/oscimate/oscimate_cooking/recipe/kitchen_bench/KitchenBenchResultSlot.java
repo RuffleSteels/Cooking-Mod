@@ -1,10 +1,12 @@
-package com.oscimate.oscimate_cooking;
+package com.oscimate.oscimate_cooking.recipe.kitchen_bench;
 
+import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchInventory;
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.RecipeUnlocker;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.sound.SoundCategory;

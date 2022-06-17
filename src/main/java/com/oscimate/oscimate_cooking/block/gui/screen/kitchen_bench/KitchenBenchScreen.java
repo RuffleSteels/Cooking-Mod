@@ -1,4 +1,4 @@
-package com.oscimate.oscimate_cooking.block.gui.screen;
+package com.oscimate.oscimate_cooking.block.gui.screen.kitchen_bench;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;

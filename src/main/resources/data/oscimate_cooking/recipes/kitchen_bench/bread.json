@@ -1,13 +1,12 @@
 {
-  "type": "oscimate_cooking:kitchen_bench_crafting_shaped",
+  "type": "minecraft:kitchen_bench_crafting_shaped",
   "pattern": [
     "###"
   ],
   "key": {
     "#": {
       "item": "minecraft:wheat"
-    }
-  },
+    }  },
   "result": {
     "item": "minecraft:bread"
   }

@@ -1,0 +1,14 @@
+{
+  "type": "oscimate_cooking:mixing_bowl",
+  "inputA" : {
+    "item": "minecraft:wheat"
+  },
+  "inputB": {
+    "tag": "minecraft:wheat_seeds"
+  },
+  "inputC": {
+    "tag": "minecraft:wheat"
+  },
+  "outputItem": "minecraft:golden_apple",
+  "outputAmount": "3"
+}

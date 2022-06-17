@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "batter=0": { "model":  "oscimate_cooking:block/mixing_bowl" },
+    "batter=1": { "model":  "oscimate_cooking:block/mixing_bowl_batter_1" },
+    "batter=2": { "model":  "oscimate_cooking:block/mixing_bowl_batter_2" },
+    "batter=3": { "model":  "oscimate_cooking:block/mixing_bowl_batter_3" }
+  }
+}
