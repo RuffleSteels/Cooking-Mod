@@ -2,6 +2,7 @@ package com.oscimate.oscimate_cooking.recipe.mixing_bowl;
 
 import com.oscimate.oscimate_cooking.block.entity.mixing_bowl.MixingBowlInventory;
 import com.oscimate.oscimate_cooking.recipe.kitchen_bench.KitchenBenchRecipeType;
+import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import net.minecraft.block.Blocks;
 import net.minecraft.data.server.recipe.CraftingRecipeJsonBuilder;
 import net.minecraft.item.ItemStack;
@@ -40,24 +41,36 @@ public class MixingBowlRecipe implements Recipe<MixingBowlInventory> {
 
     @Override
     public boolean matches(MixingBowlInventory inventory, World world) {
-        RecipeMatcher recipeMatcher = new RecipeMatcher();
-        int i = 0;
-        for (int j = 0; j < inventory.size(); ++j) {
-            ItemStack itemStack = inventory.getStack(j);
+        boolean bl = false;
+        boolean bl2 = false;
+        boolean bl3 = false;
+        for (int i = 0; i < inventory.size(); ++i) {
+            ItemStack itemStack = inventory.getStack(i);
             if (itemStack.isEmpty()) continue;
-            ++i;
-            recipeMatcher.addInput(itemStack, 1);
+            if (inputA.test(itemStack) && !bl3) {
+                bl3 = true;
+                continue;
+            }
+            if (inputB.test(itemStack) && !bl2) {
+                bl2 = true;
+                continue;
+            }
+            if (inputC.test(itemStack) && !bl) {
+                bl = true;
+                continue;
+            }
+            return false;
         }
-        return i == 3 && recipeMatcher.match(this, null);
+        return bl && bl3 && bl2;
     }
 
     @Override
     public ItemStack craft(MixingBowlInventory inventory) {
-        return ItemStack.EMPTY;
+        return this.getOutput().copy();
     }
     @Override
     public boolean fits(int var1, int var2) {
-        return false;
+        return true;
     }
     @Override
     public ItemStack getOutput() {

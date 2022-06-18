@@ -8,23 +8,14 @@ import net.minecraft.block.*;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityTicker;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.client.render.block.entity.BlockEntityRenderDispatcher;
-import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.entity.ItemFrameEntityRenderer;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.resource.ResourceReloader;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.BooleanProperty;
 import net.minecraft.state.property.IntProperty;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ItemScatterer;
@@ -80,16 +71,13 @@ public class MixingBowl extends BlockWithEntity {
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         MixingBowlEntity be = ((MixingBowlEntity) world.getBlockEntity(pos));
         if(player.getStackInHand(hand).isOf(Items.WOODEN_SHOVEL)) {
-            if (!world.isClient()) {
-                System.out.println("wooden shovel");
+//            if (!world.isClient()) {
                 Optional<MixingBowlRecipe> match = world.getRecipeManager().getFirstMatch(MixingBowlRecipe.Type.MIXING_BOWL_CRAFTING, be, world);
-
                 if (match.isPresent()) {
-                    System.out.println("hi");
                     be.clear();
                     ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), match.get().getOutput().copy());
                 }
-            }
+//            }
         } else {
             if (!player.getStackInHand(hand).isEmpty()) {
                 loop:
@@ -110,6 +98,7 @@ public class MixingBowl extends BlockWithEntity {
                 }
             }
         }
+        world.setBlockState(pos, state.with(BATTER, getState(be.getItems())));
         return ActionResult.SUCCESS;
     }
 
@@ -144,5 +133,20 @@ public class MixingBowl extends BlockWithEntity {
             }
             super.onStateReplaced(state, world, pos, newState, moved);
         }
+    }
+
+    @Override
+    public void onBlockBreakStart(BlockState state, World world, BlockPos pos, PlayerEntity player) {
+        super.onBlockBreakStart(state, world, pos, player);
+        MixingBowlEntity be = ((MixingBowlEntity) world.getBlockEntity(pos));
+        loop:
+        for (int i = 0; i < be.size(); i++) {
+            if (!be.getStack(i).isEmpty()) {
+                ItemScatterer.spawn(world, pos.getX(), pos.getY(), pos.getZ(), be.getStack(i));
+                be.removeStack(i, 1);
+                break loop;
+            }
+        }
+        world.setBlockState(pos, state.with(BATTER, getState(be.getItems())));
     }
 }
